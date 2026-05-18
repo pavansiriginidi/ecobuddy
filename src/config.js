@@ -1,0 +1,2 @@
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "722028885364-6gfdkssnph6kgpesu8b03rvm3ujuga63.apps.googleusercontent.com";
