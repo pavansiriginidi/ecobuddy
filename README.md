@@ -4,7 +4,7 @@ An intelligent e-commerce application that helps users choose eco-friendly produ
 
 ## 🚀 Features
 
-- **Google Authentication** - Secure login with Google OAuth
+- **Name-only Login** - Start the app by entering your name
 - **Smart Product Catalog** - Browse and filter eco-friendly products by category
 - **AI-Powered Recommendations** - Get instant suggestions for sustainable alternatives using Groq AI
 - **Shopping Cart** - Add, remove, and manage items with real-time updates
@@ -15,17 +15,8 @@ An intelligent e-commerce application that helps users choose eco-friendly produ
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React 18** with React Router v6
-- **Vite** for fast builds
-- **Tailwind CSS** compatible styling
-- **Google OAuth** for authentication
+- **Simple name-only login** for authentication
 - **Fetch API** for HTTP requests
-
-### Backend
-- **Express.js** - REST API server
-- **MongoDB** - Data persistence
-- **Groq AI** - LLM for eco-friendly recommendations
-- **Node.js** - Runtime
 
 ### Deployment
 - **Vercel** - Frontend hosting
@@ -37,10 +28,8 @@ An intelligent e-commerce application that helps users choose eco-friendly produ
 - **Node.js 16+** and npm
 - **MongoDB** (local or Atlas cloud)
 - **Groq API Key** (free from https://console.groq.com)
-- **Google OAuth Client ID** (from Google Cloud Console)
-
-## 🔧 Setup Instructions
-
+ **Login is name-only and stored in localStorage**
+ Add real authentication if you need user accounts
 ### 1. Clone and Install Dependencies
 
 ```bash
@@ -64,7 +53,6 @@ cp .env.example .env.local
 
 # Edit .env.local with your values
 VITE_API_BASE_URL=http://localhost:3001/api
-VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
 ```
 
 #### Backend (api/.env)
@@ -117,7 +105,7 @@ cd api && NODE_ENV=production npm start
 ## 📱 How to Use
 
 1. **Visit** `http://localhost:5173`
-2. **Login** with your Google account
+2. **Enter your name** on the login screen
 3. **Browse products** by category (Personal Care, Kitchen, Bottles, etc.)
 4. **Add items to cart** - The AI chatbot will suggest eco-friendly alternatives
 5. **View recommendations** - Click the 🤖 button to see AI-generated suggestions
@@ -144,7 +132,7 @@ ecobuddy-fullstack/
 │   │   ├── AdminDashboard.jsx   # Admin analytics
 │   │   ├── CartSummary.jsx      # Shopping cart
 │   │   ├── Chatbot.jsx          # AI recommendation display
-│   │   ├── LoginPage.jsx        # Google OAuth login
+│   │   ├── LoginPage.jsx        # Name-only login
 │   │   ├── PaymentModal.jsx     # Checkout flow
 │   │   ├── ProductCard.jsx      # Product display
 │   │   ├── ShopPage.jsx         # Main shopping interface
@@ -171,7 +159,7 @@ ecobuddy-fullstack/
 ## 🔐 Security Notes
 
 **⚠️ Current Implementation (Demo Mode):**
-- Google login is client-side verified
+- Login is name-only and stored in localStorage
 - Payment is simulated (no real transactions)
 - Admin endpoints are public
 
@@ -190,7 +178,6 @@ ecobuddy-fullstack/
 # Connect your GitHub repo to Vercel
 # Set environment variables in Vercel dashboard:
 # - VITE_API_BASE_URL
-# - VITE_GOOGLE_CLIENT_ID
 
 # Auto-deploys on git push
 ```
@@ -208,7 +195,7 @@ docker run -p 3001:3001 ecobuddy-api
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/users/register` | Register/update user from Google login |
+| POST | `/users/register` | Register/update user from submitted name |
 | GET | `/users/:email` | Get user profile |
 | POST | `/suggest` | Get AI eco-recommendation for a product |
 | POST | `/orders` | Save order to database |

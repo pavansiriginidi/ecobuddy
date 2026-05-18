@@ -2,11 +2,11 @@
 
 ## ✅ Issues Fixed
 
-### 1. **Google Login Setup**
-- ❌ **Was:** Hardcoded Google Client ID in `App.jsx`
-- ✅ **Fixed:** Moved to environment variables
-- ✅ Created `.env.local` and `.env.example` templates
-- ✅ Now uses `VITE_GOOGLE_CLIENT_ID` from config
+### 1. **Login Flow Simplification**
+- ❌ **Was:** Google OAuth login flow
+- ✅ **Fixed:** Replaced with a simple name-only login
+- ✅ Created `.env.local` and `.env.example` templates for non-auth settings
+- ✅ Login now stores the user's name locally and routes to the shop
 
 ### 2. **Environment Configuration**
 - ❌ **Was:** No `.env` setup, missing API config
@@ -60,8 +60,8 @@ ecobuddy-fullstack/
 ├── README.md (NEW)               # Full documentation
 ├── SETUP.md (NEW)                # Quick start guide
 ├── .gitignore (UPDATED)          # Proper env ignore
-├── src/App.jsx (FIXED)           # Uses GOOGLE_CLIENT_ID from config
-├── src/config.js (FIXED)         # Exports GOOGLE_CLIENT_ID
+├── src/App.jsx (FIXED)           # Uses the simplified login flow
+├── src/config.js (FIXED)         # Exports API_BASE_URL only
 ├── src/style.css (FIXED)         # Fixed CSS syntax and added payment styles
 ├── src/components/Chatbot.jsx (IMPROVED)  # Better rendering
 └── api/.env (NEW)                # Backend env config
@@ -73,7 +73,6 @@ ecobuddy-fullstack/
 ### Frontend (.env.local)
 ```env
 VITE_API_BASE_URL=http://localhost:3001/api
-VITE_GOOGLE_CLIENT_ID=722028885364-6gfdkssnph6kgpesu8b03rvm3ujuga63.apps.googleusercontent.com
 ```
 
 ### Backend (api/.env)
@@ -89,7 +88,7 @@ PORT=3001
 ✅ **Backend Server:** Ready to start
 ✅ **Environment Setup:** Complete
 ✅ **Styling:** Fixed and optimized
-✅ **Google Login:** Configured
+✅ **Login:** Simplified to name-only flow
 ✅ **Chatbot:** Enhanced
 
 ## 🚀 To Run the App
@@ -116,7 +115,7 @@ http://localhost:5173
 
 These features need production implementation:
 1. **Payment** is simulated (not real transactions)
-2. **Google Login** is client-side verified (needs server verification)
+2. **Login** is name-only and stored in localStorage
 3. **Admin endpoints** are public (need authentication)
 4. **No rate limiting** on API endpoints
 5. **No HTTPS** in dev mode
@@ -157,7 +156,7 @@ These features need production implementation:
 
 ## 📊 What Works Now
 
-✅ Google Login (client-side)
+✅ Login (name-only)
 ✅ Product browsing and filtering
 ✅ Shopping cart (localStorage)
 ✅ AI recommendations (Groq API)

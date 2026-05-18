@@ -3,7 +3,6 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const fetch = require("node-fetch");
-const authRoutes = require("./authRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -91,10 +90,6 @@ const suggestionSchema = new mongoose.Schema({
 });
 
 const Suggestion = mongoose.model("Suggestion", suggestionSchema);
-
-// ===== AUTH ROUTES =====
-app.use("/auth", authRoutes);
-app.use("/api/auth", authRoutes);
 
 // ===== USER ROUTES =====
 // Register/Update User

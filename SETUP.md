@@ -1,6 +1,9 @@
 # 🚀 Quick Start Guide - Eco Buddy
 
 Get Eco Buddy running locally in 5 minutes.
+# 🚀 Quick Start Guide - Eco Buddy
+
+Get Eco Buddy running locally in 5 minutes.
 
 ## Step 1: Get Your API Keys
 
@@ -49,7 +52,7 @@ cp .env.example .env
 
 Edit `api/.env`:
 ```env
-GROQ_API_KEY=your_groq_api_key_from_step_1
+VITE_GOOGLE_CLIENT_ID=your_groq_client_id_from_step_1
 MONGO_URI=mongodb://localhost:27017/ecobuddy
 PORT=3001
 NODE_ENV=development
@@ -118,7 +121,7 @@ npm run dev
 ### Test Google Login
 - ✅ Click "Login" button
 - ✅ Should open Google login
-- ✅ Should redirect to shop after login
+2. **Enter your name** on the login screen
 - ✅ Your profile should appear in top right
 
 ### Test AI Recommendations
@@ -127,10 +130,9 @@ npm run dev
 - ✅ Chatbot should open (bottom right)
 - ✅ Should show loading message
 - ✅ AI suggestion should appear in 2-3 seconds
-
-### Test Shopping Cart
-- ✅ Add multiple products
-- ✅ Cart count badge should update
+- ✅ Enter a name and click "Continue"
+- ✅ Should redirect to shop after submit
+- ✅ Your profile should appear in top right
 - ✅ Click cart button (bottom left)
 - ✅ See all items with quantities
 - ✅ Click "Checkout" button
