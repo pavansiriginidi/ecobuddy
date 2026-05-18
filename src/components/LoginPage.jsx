@@ -1,33 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
 import { API_BASE_URL } from "../config";
 
 function LoginPage() {
-  const navigate = useNavigate();
   const [error, setError] = useState("");
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      setError("");
-      const res = await fetch(`${API_BASE_URL}/auth/google`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential: credentialResponse.credential }),
-      });
-
-      const data = await res.json();
-      
-      if (data.success) {
-        localStorage.setItem("ecoUser", JSON.stringify(data.user));
-        // Store Google ID token for authenticated requests
-        if (credentialResponse && credentialResponse.credential) {
-          localStorage.setItem("ecoToken", credentialResponse.credential);
-        }
-        console.log("✅ User authenticated:", data.message);
-        navigate("/shop");
-      } else {
-        console.error("❌ Google auth failed:", data.error);
+  const handleGoogleLogin = () => {
+    setError("");
+    window.location.href = `${API_BASE_URL}/auth/google`;
         setError(`Google Auth Error: ${data.error || "Failed to authenticate user"}`);
       }
     } catch (error) {
@@ -75,13 +54,22 @@ function LoginPage() {
               🔐 Secure Login with Google
             </p>
             <div className="google-login-wrapper" style={{ minHeight: "50px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={handleGoogleError}
-                size="large"
-                text="signin_with"
-                theme="filled_blue"
-              />
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                style={{
+                  border: "none",
+                  borderRadius: "999px",
+                  padding: "12px 20px",
+                  background: "#1a73e8",
+                  color: "white",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "0 10px 24px rgba(26, 115, 232, 0.25)",
+                }}
+              >
+                Continue with Google
+              </button>
             </div>
           </div>
 
