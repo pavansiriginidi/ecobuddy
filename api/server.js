@@ -3,13 +3,38 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const fetch = require("node-fetch");
+const authRoutes = require("./authRoutes");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:3000",
+]
+  .filter(Boolean)
+  .flatMap((origin) => origin.split(","))
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked for origin ${origin}`));
+  },
+  credentials: true,
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(bodyParser.json());
 
 // MongoDB Connection
@@ -66,6 +91,10 @@ const suggestionSchema = new mongoose.Schema({
 });
 
 const Suggestion = mongoose.model("Suggestion", suggestionSchema);
+
+// ===== AUTH ROUTES =====
+app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 
 // ===== USER ROUTES =====
 // Register/Update User
