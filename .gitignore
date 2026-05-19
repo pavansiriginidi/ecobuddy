@@ -1,5 +1,6 @@
 node_modules/
-dist/
 .vite/
 .env.local
 .DS_Store
+# Keep API folder out of git (you will provide API via Vercel env vars)
+api/
