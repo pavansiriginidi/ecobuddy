@@ -4,3 +4,4 @@ node_modules/
 .DS_Store
 # Keep API folder out of git (you will provide API via Vercel env vars)
 api/
+dist/
