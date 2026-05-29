@@ -123,8 +123,24 @@ function AdminDashboard() {
                     border: "1px solid #e5e7eb",
                   }}
                 >
-                  <p style={{ fontWeight: "600", color: "#1f2937", marginBottom: "5px" }}>{order.user}</p>
-                  <p style={{ fontSize: "0.9rem", color: "#6b7280", marginBottom: "8px" }}>{order.email}</p>
+                  <p style={{ fontWeight: "600", color: "#1f2937", marginBottom: "5px" }}>
+                    {order.username || order.user}
+                  </p>
+                  <p style={{ fontSize: "0.9rem", color: "#6b7280", marginBottom: "8px" }}>
+                    {order.user}
+                  </p>
+                  <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "4px" }}>
+                    Age: {order.age || "—"}
+                  </p>
+                  <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "4px" }}>
+                    Address: {order.address || "—"}
+                  </p>
+                  <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "4px" }}>
+                    Transaction ID: {order.transactionId || "—"}
+                  </p>
+                  <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "8px" }}>
+                    Payment: {order.paymentMethod || "—"}
+                  </p>
                   <p style={{ fontSize: "1rem", fontWeight: "600", color: "#10b981" }}>
                     {formatCurrency(order.total)}
                   </p>
@@ -184,12 +200,25 @@ function AdminDashboard() {
                         color: "#ffffff",
                       }}
                     >
-                      {(user.name || "U").charAt(0)}
+                      {(user.username || user.name || "U").charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div>
-                    <p style={{ fontWeight: "600", color: "#1f2937", fontSize: "0.95rem" }}>{user.name}</p>
-                    <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>{user.email}</p>
+                    <p style={{ fontWeight: "600", color: "#1f2937", fontSize: "0.95rem" }}>
+                      {user.username || user.name}
+                    </p>
+                    <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                      {user.name}
+                    </p>
+                    <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                      Age: {user.age || "—"}
+                    </p>
+                    <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                      Address: {user.address || "—"}
+                    </p>
+                    <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                      Transaction: {user.transactionId || "—"}
+                    </p>
                   </div>
                 </div>
               ))}

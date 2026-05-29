@@ -1,7 +1,7 @@
 // Pexels API Service for fetching eco-friendly product images
 // Get your free API key at: https://www.pexels.com/api/
 
-const PEXELS_API_KEY = import.meta.env.VITE_PEXELS_API_KEY || "YOUR_PEXELS_API_KEY";
+const PEXELS_API_KEY = import.meta.env.VITE_PEXELS_API_KEY || "";
 
 // Search for images on Pexels
 export const searchPexelsImage = async (query) => {

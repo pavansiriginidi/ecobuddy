@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import PaymentModal from "./PaymentModal";
 
-function CartSummary({ cart, getPrice, total, handlePayment, clearCart }) {
+function CartSummary({ cart, getPrice, total, handlePayment, clearCart, username }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const itemCount = Object.values(cart).reduce((a, b) => a + b, 0);
 
-  const onPaymentSuccess = () => {
-    handlePayment();
+  const onPaymentSuccess = (paymentDetails) => {
+    handlePayment(paymentDetails);
   };
 
   return (
@@ -53,6 +53,9 @@ function CartSummary({ cart, getPrice, total, handlePayment, clearCart }) {
 
             {itemCount > 0 && (
               <>
+                <div className="cart-user-chip" style={{ padding: "0 16px 10px", color: "#374151", fontSize: "0.9rem" }}>
+                  <strong>User:</strong> {username || "Guest"}
+                </div>
                 <div className="cart-total">
                   <span>Total:</span>
                   <span>₹{total}</span>
@@ -82,6 +85,7 @@ function CartSummary({ cart, getPrice, total, handlePayment, clearCart }) {
         total={total}
         itemCount={itemCount}
         cartItems={cart}
+        username={username || "Guest"}
         onPaymentSuccess={onPaymentSuccess}
       />
     </>

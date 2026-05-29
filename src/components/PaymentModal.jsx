@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 
-function PaymentModal({ isOpen, onClose, total, itemCount, onPaymentSuccess, cartItems }) {
+function PaymentModal({ isOpen, onClose, total, itemCount, onPaymentSuccess, cartItems, username }) {
   const [paymentMethod, setPaymentMethod] = useState("upi");
   const [formData, setFormData] = useState({
     upiId: "",
     cardNumber: "",
     cardName: "",
     expiryDate: "",
-    cvv: ""
+    cvv: "",
+    address: ""
   });
   const [errors, setErrors] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
@@ -16,6 +17,11 @@ function PaymentModal({ isOpen, onClose, total, itemCount, onPaymentSuccess, car
   const validateUPI = (upiId) => {
     const upiRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9]+$/;
     return upiRegex.test(upiId);
+  };
+
+  const generateTransactionId = () => {
+    const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
+    return `TXN-${Date.now().toString(36).toUpperCase()}-${randomPart}`;
   };
 
   const validateCard = () => {
@@ -53,7 +59,11 @@ function PaymentModal({ isOpen, onClose, total, itemCount, onPaymentSuccess, car
         newErrors.upiId = "Invalid UPI ID format (e.g., name@bank)";
       }
     } else if (paymentMethod === "card") {
-      return validateCard();
+      Object.assign(newErrors, validateCard());
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
     }
 
     setErrors(newErrors);
@@ -97,7 +107,12 @@ function PaymentModal({ isOpen, onClose, total, itemCount, onPaymentSuccess, car
       if (success) {
         setPaymentStatus("success");
         setTimeout(() => {
-          onPaymentSuccess();
+          onPaymentSuccess({
+            address: formData.address.trim(),
+            paymentMethod,
+            transactionId: generateTransactionId(),
+            paymentLabel: paymentMethod === "upi" ? `UPI: ${formData.upiId.trim()}` : `Card: ${formData.cardName.trim()}`,
+          });
           resetModal();
         }, 1500);
       } else {
@@ -116,7 +131,8 @@ function PaymentModal({ isOpen, onClose, total, itemCount, onPaymentSuccess, car
       cardNumber: "",
       cardName: "",
       expiryDate: "",
-      cvv: ""
+      cvv: "",
+      address: ""
     });
     setErrors({});
     setIsProcessing(false);
@@ -166,10 +182,28 @@ function PaymentModal({ isOpen, onClose, total, itemCount, onPaymentSuccess, car
             {/* Order Summary */}
             <div className="order-summary">
               <h3>Order Summary</h3>
+              <p><strong>User:</strong> {username || "Guest"}</p>
               <p>{itemCount} items in cart</p>
               <div className="summary-total">
                 <strong>Total Amount:</strong>
                 <strong style={{ color: "#10b981" }}>₹{total}</strong>
+              </div>
+            </div>
+
+            <div className="payment-form">
+              <div className="form-group">
+                <label htmlFor="address">Shipping Address</label>
+                <input
+                  id="address"
+                  type="text"
+                  name="address"
+                  placeholder="Enter your delivery address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  disabled={isProcessing}
+                  className={errors.address ? "input-error" : ""}
+                />
+                {errors.address && <span className="error-msg">{errors.address}</span>}
               </div>
             </div>
 

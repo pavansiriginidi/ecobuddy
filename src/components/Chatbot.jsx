@@ -15,42 +15,13 @@ function Chatbot({ message, forceOpen }) {
 
   const renderFormattedMessage = (text) => {
     if (!text) return null;
-    
-    const normalizedText = String(text || "").replace(/<br\s*\/?>/gi, "\n").trim();
+
+    const normalizedText = String(text || "").trim();
     const lines = normalizedText.split(/\n+/).filter(Boolean);
 
-    const renderInline = (line, lineIndex) => {
-      const parts = [];
-      // Match **text** or <b>text</b> patterns
-      const pattern = /(\*\*[^*]+\*\*|<b>.*?<\/b>)/gi;
-      let lastIndex = 0;
-      let match;
-
-      while ((match = pattern.exec(line)) !== null) {
-        if (match.index > lastIndex) {
-          parts.push(line.slice(lastIndex, match.index));
-        }
-
-        const raw = match[0];
-        const boldText = raw.replace(/^\*\*|\*\*$/g, "").replace(/^<b>|<\/b>$/gi, "");
-        parts.push(
-          <strong key={`${lineIndex}-${match.index}`} style={{ color: "#10b981" }}>
-            {boldText}
-          </strong>
-        );
-        lastIndex = pattern.lastIndex;
-      }
-
-      if (lastIndex < line.length) {
-        parts.push(line.slice(lastIndex));
-      }
-
-      return parts.length > 0 ? parts : line;
-    };
-
     return lines.map((line, lineIndex) => (
-      <div key={`${lineIndex}-${line.slice(0, 12)}`} className="chat-line" style={{ marginBottom: "8px" }}>
-        {renderInline(line, lineIndex)}
+      <div key={`${lineIndex}-${line.slice(0, 12)}`} className="chat-line" style={{ marginBottom: "8px", whiteSpace: 'pre-wrap' }}>
+        {line}
       </div>
     ));
   };

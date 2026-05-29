@@ -4,7 +4,7 @@ An intelligent e-commerce application that helps users choose eco-friendly produ
 
 ## 🚀 Features
 
-- **Name-only Login** - Start the app by entering your name
+- **Age-aware Login** - Start the app by entering your name and age
 - **Smart Product Catalog** - Browse and filter eco-friendly products by category
 - **AI-Powered Recommendations** - Get instant suggestions for sustainable alternatives using Groq AI
 - **Shopping Cart** - Add, remove, and manage items with real-time updates
@@ -15,7 +15,7 @@ An intelligent e-commerce application that helps users choose eco-friendly produ
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **Simple name-only login** for authentication
+- **Name and age login** for customer identity
 - **Fetch API** for HTTP requests
 
 ### Deployment
@@ -26,7 +26,7 @@ An intelligent e-commerce application that helps users choose eco-friendly produ
 ## 📋 Prerequisites
 
 - **Node.js 16+** and npm
-- **MongoDB** (local or Atlas cloud)
+- **MongoDB** (local or Atlas cloud) for persistent app data
 - **Groq API Key** (free from https://console.groq.com)
  **Login is name-only and stored in localStorage**
  Add real authentication if you need user accounts
@@ -46,13 +46,14 @@ cd api && npm install && cd ..
 
 ### 2. Configure Environment Variables
 
-#### Frontend (.env.local)
+#### Frontend (.env)
 ```bash
 # Copy the example
-cp .env.example .env.local
+cp .env.example .env
 
-# Edit .env.local with your values
-VITE_API_BASE_URL=http://localhost:3001/api
+# Edit .env with your values
+VITE_API_BASE_URL=/api
+VITE_PEXELS_API_KEY=your_pexels_api_key_here
 ```
 
 #### Backend (api/.env)
@@ -62,7 +63,9 @@ cp api/.env.example api/.env
 
 # Edit api/.env with your values
 GROQ_API_KEY=your_groq_api_key_here
-MONGO_URI=mongodb://localhost:27017/ecobuddy
+MONGO_URI=mongodb+srv://<db_username>:<db_password>@cluster0.example.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGO_DB_NAME=ecobuddy
+JWT_SECRET=replace_with_a_long_random_secret
 PORT=3001
 ```
 
@@ -73,7 +76,7 @@ PORT=3001
 mongod
 
 # Or use MongoDB Atlas (cloud)
-# Just set MONGO_URI to your Atlas connection string in api/.env
+# Just set MONGO_URI to your Atlas connection string in api/.env, ending with /test-ecobuddy
 ```
 
 ### 4. Run the Application
@@ -196,10 +199,10 @@ docker run -p 3001:3001 ecobuddy-api
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/users/register` | Register/update user from submitted name |
-| GET | `/users/:email` | Get user profile |
+| GET | `/users/:identifier` | Get user profile by username |
 | POST | `/suggest` | Get AI eco-recommendation for a product |
 | POST | `/orders` | Save order to database |
-| GET | `/orders/:email` | Get user's order history |
+| GET | `/orders/:identifier` | Get user's order history by username |
 | GET | `/orders` | Get all orders (admin) |
 | GET | `/stats` | Get dashboard statistics |
 
@@ -211,7 +214,6 @@ docker run -p 3001:3001 ecobuddy-api
 - [ ] Personalized product recommendations
 - [ ] Community impact dashboard
 - [ ] Real payment gateway integration
-- [ ] Email receipts and order notifications
 - [ ] Mobile app (React Native)
 - [ ] Product reviews and ratings
 - [ ] Wishlist and price tracking

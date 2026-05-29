@@ -6,14 +6,16 @@ import CartSummary from "./CartSummary";
 import Chatbot from "./Chatbot";
 import { API_BASE_URL } from "../config";
 
-const CART_KEY = "ecoCart";
+const LEGACY_CART_KEY = "ecoCart";
+
+const normalizeCustomerName = (value) => String(value || "").trim().toLowerCase();
+
+const getCartKey = (customerName) => {
+  const normalized = normalizeCustomerName(customerName);
+  return normalized ? `ecoCart:${encodeURIComponent(normalized)}` : LEGACY_CART_KEY;
+};
 
 function ShopPage() {
-  const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem(CART_KEY);
-    return saved ? JSON.parse(saved) : {};
-  });
-
   const [lastSuggestion, setLastSuggestion] = useState("");
   const [chatOpen, setChatOpen] = useState(false);
   const [filter, setFilter] = useState("All");
@@ -24,21 +26,49 @@ function ShopPage() {
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("ecoUser") || '{}');
+  const customerName = (user.username || user.name || "Guest").trim();
+  const username = customerName;
+  const cartStorageKey = getCartKey(customerName);
+
+  const [cart, setCart] = useState(() => {
+    const saved = localStorage.getItem(cartStorageKey);
+
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (error) {
+        console.error("Failed to parse saved cart", error);
+      }
+    }
+
+    const legacySaved = localStorage.getItem(LEGACY_CART_KEY);
+    if (legacySaved) {
+      try {
+        const parsed = JSON.parse(legacySaved);
+        localStorage.setItem(cartStorageKey, JSON.stringify(parsed));
+        localStorage.removeItem(LEGACY_CART_KEY);
+        return parsed;
+      } catch (error) {
+        console.error("Failed to migrate legacy cart", error);
+      }
+    }
+
+    return {};
+  });
 
   const logout = () => {
     localStorage.removeItem("ecoUser");
-    localStorage.removeItem(CART_KEY);
     navigate("/");
   };
 
   const categories = ["All", "Personal Care", "Kitchen", "Bottles", "Bags", "Home", "Fitness", "Electronics", "Office"];
 
   useEffect(() => {
-    localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  }, [cart]);
+    localStorage.setItem(cartStorageKey, JSON.stringify(cart));
+  }, [cart, cartStorageKey]);
 
   useEffect(() => {
-    if (!showRecentOrders || !user.email) {
+    if (!showRecentOrders || !username) {
       return;
     }
 
@@ -47,17 +77,7 @@ function ShopPage() {
       setRecentOrdersError("");
 
       try {
-        const token = localStorage.getItem("ecoToken");
-        if (!token) {
-          setRecentOrdersError("Not authenticated. Please login.");
-          setRecentOrders([]);
-          setRecentOrdersLoading(false);
-          return;
-        }
-
-        const res = await fetch(`${API_BASE_URL}/orders/${encodeURIComponent(user.email)}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await fetch(`${API_BASE_URL}/orders/${encodeURIComponent(username)}`);
         const data = await res.json();
 
         if (data.success) {
@@ -79,7 +99,7 @@ function ShopPage() {
     };
 
     loadRecentOrders();
-  }, [showRecentOrders, user.email]);
+  }, [showRecentOrders, username]);
 
   const filteredProducts = filter === "All" ? products : products.filter((p) => p.category === filter);
 
@@ -90,11 +110,18 @@ function ShopPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ product: productName }),
       });
-      const data = await res.json();
-      setLastSuggestion(data.message);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        // No local fallback suggestions per request; surface the error to the UI.
+        const err = data && data.message ? data.message : 'Unable to fetch eco suggestion right now.';
+        setLastSuggestion(`⚠️ ${err}`);
+        return;
+      }
+
+      setLastSuggestion(data.message || "");
     } catch (error) {
       console.error("Groq error:", error.message);
-      setLastSuggestion("🌱 Try using eco-friendly alternatives!");
+      setLastSuggestion(`⚠️ Could not retrieve suggestion for ${productName}.`);
     }
   };
 
@@ -120,7 +147,7 @@ function ShopPage() {
 
   const clearCart = () => {
     setCart({});
-    localStorage.removeItem(CART_KEY);
+    localStorage.removeItem(cartStorageKey);
     setLastSuggestion("🧺 Your cart has been cleared.");
     setChatOpen(true);
   };
@@ -132,12 +159,16 @@ function ShopPage() {
 
   const total = Object.entries(cart).reduce((sum, [name, qty]) => sum + qty * getPrice(name), 0);
 
-  const handlePayment = async () => {
-    const itemCount = Object.values(cart).reduce((a, b) => a + b, 0);
-
+  const handlePayment = async (paymentDetails = {}) => {
     const order = {
       user: user.name || "Guest",
-      email: user.email,
+      username,
+      customerName,
+      age: user.age || "",
+      address: paymentDetails.address || "",
+      paymentMethod: paymentDetails.paymentMethod || "",
+      transactionId: paymentDetails.transactionId || "",
+      paymentLabel: paymentDetails.paymentLabel || "",
       cart,
       total,
       date: new Date().toISOString(),
@@ -145,23 +176,16 @@ function ShopPage() {
     };
 
     try {
-      const token = localStorage.getItem("ecoToken");
-      if (!token || !user.email) {
-        console.warn("Not authenticated - redirecting to login");
-        navigate("/login");
-        return;
-      }
-
       const res = await fetch(`${API_BASE_URL}/orders`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(order)
       });
 
       if (res.ok) {
         // Clear cart after successful order
         setCart({});
-        localStorage.removeItem(CART_KEY);
+        localStorage.removeItem(cartStorageKey);
         console.log("✅ Order saved successfully!");
       } else {
         console.error("⚠️ Failed to save order.");
@@ -185,14 +209,19 @@ function ShopPage() {
           >
             <span className="profile-avatar-wrap">
               {user.picture ? (
-                <img src={user.picture} alt={user.name || "User"} className="user-avatar" />
+                <img src={user.picture} alt={username || user.name || "User"} className="user-avatar" />
               ) : (
                 <div className="user-avatar user-avatar-fallback">
-                  {(user.name || "U").charAt(0).toUpperCase()}
+                  {(username || user.name || "U").charAt(0).toUpperCase()}
                 </div>
               )}
             </span>
           </button>
+
+          <div className="profile-identity">
+            <span className="profile-username">{username || user.name || "Guest"}</span>
+            <span className="profile-name">{user.name || "EcoBuddy shopper"}</span>
+          </div>
 
           {showRecentOrders && (
             <div className="recent-orders-panel">
@@ -213,8 +242,8 @@ function ShopPage() {
                 </div>
               </div>
 
-              {!user.email ? (
-                <p className="recent-orders-empty">No email found for this profile.</p>
+              {!username ? (
+                <p className="recent-orders-empty">No username found for this profile.</p>
               ) : recentOrdersLoading ? (
                 <p className="recent-orders-empty">Loading recent orders...</p>
               ) : recentOrdersError ? (
@@ -226,6 +255,7 @@ function ShopPage() {
                   {recentOrders.map((order) => (
                     <div key={order._id} className="recent-order-card">
                       <div className="recent-order-top">
+                        <span className="recent-order-user">{order.username || order.user}</span>
                         <span className="recent-order-date">
                           {new Date(order.date).toLocaleDateString()}
                         </span>
@@ -284,6 +314,7 @@ function ShopPage() {
         total={total}
         handlePayment={handlePayment}
         clearCart={clearCart}
+        username={username}
       />
       <Chatbot message={lastSuggestion} forceOpen={chatOpen} />
     </>
