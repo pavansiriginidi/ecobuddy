@@ -26,11 +26,14 @@ const allowedOrigins = [
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const allowedOriginPatterns = [/^https:\/\/.*\.vercel\.app$/];
+
 const corsOptions = {
   origin(origin, callback) {
     const isLocalhostOrigin = /^http:\/\/localhost:\d+$/.test(origin || "") || /^http:\/\/127\.0\.0\.1:\d+$/.test(origin || "");
+    const isAllowedPattern = allowedOriginPatterns.some((pattern) => pattern.test(origin || ""));
 
-    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin) || isLocalhostOrigin) {
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin) || isLocalhostOrigin || isAllowedPattern) {
       return callback(null, true);
     }
 
