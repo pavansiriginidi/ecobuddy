@@ -78,6 +78,67 @@ const isGenericEcoAlternative = (value) => {
   return /reusable alternative|eco-friendly version|sustainable option|generic alternative|better eco alternative|environmentally friendly/i.test(text);
 };
 
+const buildFallbackSuggestion = (product) => {
+  const lower = product.toLowerCase();
+
+  if (lower.includes("toothbrush")) {
+    return {
+      product,
+      ecoAlternative: "Bamboo Toothbrush",
+      ecoRating: "4.7",
+      whyBetter: ["Biodegradable handle", "Cuts plastic waste"],
+    };
+  }
+
+  if (lower.includes("bottle") || lower.includes("water")) {
+    return {
+      product,
+      ecoAlternative: "Stainless Steel Water Bottle",
+      ecoRating: "4.8",
+      whyBetter: ["Reusable for years", "Reduces single-use plastic"],
+    };
+  }
+
+  if (lower.includes("bag") || lower.includes("grocery")) {
+    return {
+      product,
+      ecoAlternative: "Cloth Grocery Bag",
+      ecoRating: "4.6",
+      whyBetter: ["Reusable and washable", "Replaces disposable bags"],
+    };
+  }
+
+  if (lower.includes("soap") || lower.includes("shampoo") || lower.includes("cleanser")) {
+    return {
+      product,
+      ecoAlternative: "Refillable Soap Dispenser",
+      ecoRating: "4.5",
+      whyBetter: ["Supports refill packs", "Cuts single-use packaging"],
+    };
+  }
+
+  return {
+    product,
+    ecoAlternative: "Reusable Eco-Friendly Alternative",
+    ecoRating: "4.2",
+    whyBetter: ["Reduces waste", "Lasts longer than disposable options"],
+  };
+};
+
+const saveSuggestion = async (suggestion) => {
+  try {
+    const { suggestions } = await getCollections();
+    await suggestions.insertOne({
+      _id: randomUUID(),
+      product: suggestion.product,
+      suggestion: formatSuggestionMessage(suggestion),
+      timestamp: nowIso(),
+    });
+  } catch (error) {
+    console.warn("Could not persist suggestion", error.message);
+  }
+};
+
 // ===== USER ROUTES =====
 const normalizeText = (value) => String(value || "").trim();
 const nowIso = () => new Date().toISOString();
@@ -265,11 +326,14 @@ app.post("/suggest", async (req, res) => {
     return res.json({ message: tip });
   }
 
-  if (!process.env.GROQ_API_KEY) {
-    return res.status(500).json({ message: "Groq API key is missing." });
-  }
+  const fallbackSuggestion = buildFallbackSuggestion(product);
 
   try {
+    if (!process.env.GROQ_API_KEY) {
+      await saveSuggestion(fallbackSuggestion);
+      return res.json({ message: formatSuggestionMessage(fallbackSuggestion), source: "fallback" });
+    }
+
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -295,7 +359,8 @@ app.post("/suggest", async (req, res) => {
       let errBody = {};
       try { errBody = await response.json(); } catch { /* ignore */ }
       console.error("Groq API error:", errBody);
-      return res.status(response.status).json({ message: "Groq API error" });
+      await saveSuggestion(fallbackSuggestion);
+      return res.json({ message: formatSuggestionMessage(fallbackSuggestion), source: "fallback" });
     }
 
     const data = await response.json();
@@ -306,7 +371,8 @@ app.post("/suggest", async (req, res) => {
       parsed = typeof content === 'string' ? JSON.parse(content) : content;
     } catch (e) {
       console.error('Invalid JSON from Groq:', e.message);
-      return res.status(500).json({ message: 'Invalid AI response format' });
+      await saveSuggestion(fallbackSuggestion);
+      return res.json({ message: formatSuggestionMessage(fallbackSuggestion), source: "fallback" });
     }
 
     if (
@@ -320,11 +386,13 @@ app.post("/suggest", async (req, res) => {
       typeof parsed.whyBetter[1] !== 'string'
     ) {
       console.error('AI response missing required fields or invalid format', parsed);
-      return res.status(500).json({ message: 'AI response missing required fields or invalid format' });
+      await saveSuggestion(fallbackSuggestion);
+      return res.json({ message: formatSuggestionMessage(fallbackSuggestion), source: "fallback" });
     }
 
     if (isGenericEcoAlternative(parsed.ecoAlternative)) {
-      return res.status(500).json({ message: 'AI returned a generic ecoAlternative.' });
+      await saveSuggestion(fallbackSuggestion);
+      return res.json({ message: formatSuggestionMessage(fallbackSuggestion), source: "fallback" });
     }
 
     const ratingNum = Number(parsed.ecoRating);
@@ -342,19 +410,13 @@ app.post("/suggest", async (req, res) => {
 
     const message = formatSuggestionMessage(normalized);
 
-    const { suggestions } = await getCollections();
+    await saveSuggestion(normalized);
 
-    await suggestions.insertOne({
-      _id: randomUUID(),
-      product: normalized.product,
-      suggestion: message,
-      timestamp: nowIso(),
-    });
-
-    res.json({ message });
+    res.json({ message, source: "ai" });
   } catch (error) {
     console.error("Groq API error:", error.message);
-    res.status(500).json({ message: 'Groq API request failed' });
+    await saveSuggestion(fallbackSuggestion);
+    res.json({ message: formatSuggestionMessage(fallbackSuggestion), source: "fallback" });
   }
 });
 
