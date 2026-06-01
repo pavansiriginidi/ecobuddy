@@ -101,6 +101,9 @@ npm run dev
 # Build frontend
 npm run build
 
+# Serve the production frontend build locally
+npm start
+
 # Run API in production
 cd api && NODE_ENV=production npm start
 ```
@@ -181,6 +184,8 @@ ecobuddy-fullstack/
 # Connect your GitHub repo to Vercel
 # Set environment variables in Vercel dashboard:
 # - VITE_API_BASE_URL
+# - MONGO_URI
+# - GROQ_API_KEY
 
 # Auto-deploys on git push
 ```

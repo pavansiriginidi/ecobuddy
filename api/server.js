@@ -43,6 +43,10 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.use(bodyParser.json());
 
+app.get("/health", (_req, res) => {
+  res.json({ success: true, status: "ok" });
+});
+
 // Persistent MongoDB-backed data store.
 
 // No fallback responses: the API only returns validated Groq output.
