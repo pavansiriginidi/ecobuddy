@@ -23,6 +23,7 @@ function ShopPage() {
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentOrdersLoading, setRecentOrdersLoading] = useState(false);
   const [recentOrdersError, setRecentOrdersError] = useState("");
+  const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
   const navigate = useNavigate();
 
   const user = JSON.parse(localStorage.getItem("ecoUser") || '{}');
@@ -104,6 +105,7 @@ function ShopPage() {
   const filteredProducts = filter === "All" ? products : products.filter((p) => p.category === filter);
 
   const fetchGroqSuggestion = async (productName) => {
+    setIsSuggestionLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/suggest`, {
         method: "POST",
@@ -122,6 +124,8 @@ function ShopPage() {
     } catch (error) {
       console.error("Groq error:", error.message);
       setLastSuggestion(`⚠️ Could not retrieve suggestion for ${productName}.`);
+    } finally {
+      setIsSuggestionLoading(false);
     }
   };
 
@@ -316,7 +320,7 @@ function ShopPage() {
         clearCart={clearCart}
         username={username}
       />
-      <Chatbot message={lastSuggestion} forceOpen={chatOpen} />
+      <Chatbot message={lastSuggestion} forceOpen={chatOpen} loading={isSuggestionLoading} />
     </>
   );
 }

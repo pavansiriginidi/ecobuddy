@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 const CHAT_HISTORY_KEY = "ecoChatHistory";
 
-function Chatbot({ message, forceOpen }) {
+function Chatbot({ message, forceOpen, loading }) {
   const [open, setOpen] = useState(false);
   const [history, setHistory] = useState(() => {
     try {
@@ -111,6 +111,9 @@ function Chatbot({ message, forceOpen }) {
             </button>
           </div>
           <div className="chat-body-scroll">
+            {loading && (
+              <div className="chat-loading">Loading your eco suggestion...</div>
+            )}
             {history.length === 0 ? (
               <p style={{ color: "#9ca3af", fontSize: "0.9rem" }}>💡 Add items to your cart to build your eco suggestion history!</p>
             ) : (
