@@ -130,9 +130,6 @@ function AdminDashboard() {
                     {order.user}
                   </p>
                   <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "4px" }}>
-                    Age: {order.age || "—"}
-                  </p>
-                  <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "4px" }}>
                     Address: {order.address || "—"}
                   </p>
                   <p style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "4px" }}>
@@ -209,9 +206,6 @@ function AdminDashboard() {
                     </p>
                     <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>
                       {user.name}
-                    </p>
-                    <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>
-                      Age: {user.age || "—"}
                     </p>
                     <p style={{ fontSize: "0.8rem", color: "#6b7280" }}>
                       Address: {user.address || "—"}

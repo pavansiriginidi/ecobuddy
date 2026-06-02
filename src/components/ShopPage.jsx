@@ -168,7 +168,6 @@ function ShopPage() {
       user: user.name || "Guest",
       username,
       customerName,
-      age: user.age || "",
       address: paymentDetails.address || "",
       paymentMethod: paymentDetails.paymentMethod || "",
       transactionId: paymentDetails.transactionId || "",
