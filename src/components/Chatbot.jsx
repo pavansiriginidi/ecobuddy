@@ -112,7 +112,10 @@ function Chatbot({ message, forceOpen, loading }) {
           </div>
           <div className="chat-body-scroll">
             {loading && (
-              <div className="chat-loading">Loading your eco suggestion...</div>
+              <div className="chat-loading">
+                <span className="chat-loading-spinner" aria-hidden="true" />
+                <span>Loading your eco suggestion...</span>
+              </div>
             )}
             {history.length === 0 ? (
               <p style={{ color: "#9ca3af", fontSize: "0.9rem" }}>💡 Add items to your cart to build your eco suggestion history!</p>
